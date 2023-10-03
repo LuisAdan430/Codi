@@ -3,9 +3,45 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	
+	<bean id="sigSecFrecuenteServicios" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="select nextval('comisionistas.cofrecuentes_id_seq'::regclass)" />
+	</bean>
 	
+	<bean id="nuevoFrecuenteServicios" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="INSERT INTO comisionistas.cofrecuentes(id,
+			ahcuenta_id,co_servicio_id,referencia,monto,
+			fecha_creacion,activo,usuario_creacion)
+			VALUES(?,?,?,?,?,current_timestamp,?,?)" />
+	</bean>
 	
+	<bean id="obtenerFrecuenteTercerosYRecargas" class ="java.lang.String">
+		<constructor-arg type="java.long.String"
+		value="select ce.id, ce.servicio, ce.tipo_producto, ce.tipo_servicio, ce.nememp, ce.subemp, ce.comision,
+   			   cc.servicio_codigo as codigo
+   				from comisionistas.cofrecuentes nt
+   				inner join comisionistas.coservicios_empresas ce on ce.id = nt.co_servicio_id
+  				inner join comisionistas.coservicios_codigos cc on ce.codigo_servicio = cc.id
+   				inner join ahorro.ahcuentas c on c.id = nt.ahcuenta_id 
+  				where tipo_servicio = ? and ce.activo = ? and c.cuenta = ? and nt.activo = ?;" 
+		/>
+	</bean>
 	
+	<bean id="desactivarFrecuente" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="update comisionistas.cofrecuentes set activo = 'NO',
+			fecha_modificacion = current_timestamp,usuario_modificacion = ? 
+			 where id = ?;" />
+	</bean>
+	
+	<bean id="FrecuentesServiciosDAO" class="net.cero.spring.dao.FrecuentesServiciosDAO">
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+		<property name="sigSecFrecuenteServicios" ref="sigSecFrecuenteServicios"/>
+		<property name="nuevoFrecuenteServicios" ref="nuevoFrecuenteServicios"/>
+		<property name="obtenerFrecuenteTercerosYRecargas" ref="obtenerFrecuenteTercerosYRecargas"/>
+		<property name="desactivarFrecuente" ref="desactivarFrecuente"/>
+	</bean>
 	
 	
 	
