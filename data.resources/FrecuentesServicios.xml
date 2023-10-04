@@ -30,15 +30,24 @@
 	
 	<bean id="desactivarFrecuente" class="java.lang.String">
 		<constructor-arg type="java.lang.String"
-			value="update comisionistas.cofrecuentes set activo = 'NO',
+			value=" update comisionistas.cofrecuentes set activo = 'NO',
 			fecha_modificacion = current_timestamp,usuario_modificacion = ? 
 			 where id = ?;" />
 	</bean>
+	
+	<bean id="buscarFrecuenteById" class="java.lang.String">
+		<constructor-arg type="java.lang.String"
+			value="select id from comisionistas.cofrecuentes where id= ?;" />
+	</bean>
+	
+	
+	
 	
 	<bean id="FrecuentesServiciosDAO" class="net.cero.spring.dao.FrecuentesServiciosDAO">
 		<property name="jdbcTemplate" ref="jdbcTemplate"/>
 		<property name="sigSecFrecuenteServicios" ref="sigSecFrecuenteServicios"/>
 		<property name="nuevoFrecuenteServicios" ref="nuevoFrecuenteServicios"/>
+		<property name="buscarFrecuenteById" ref="buscarFrecuenteById"/>
 		<property name="obtenerFrecuenteTercerosYRecargas" ref="obtenerFrecuenteTercerosYRecargas"/>
 		<property name="desactivarFrecuente" ref="desactivarFrecuente"/>
 	</bean>
