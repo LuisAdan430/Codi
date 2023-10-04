@@ -27,7 +27,7 @@ import net.cero.ahorro.logica.FrecuentesServiciosLogic;
 
 @Controller
 public class FrecuentesServicios {
-	@Autowired
+		@Autowired
 	protected IPAuthenticationProvider authenticationManager;
 
 	private static final Logger log = LogManager.getLogger(FrecuentesWS.class);
@@ -75,8 +75,8 @@ public class FrecuentesServicios {
 		return response;
 	}
 
-	@RequestMapping(value = "/consultarFrecuentes", method = RequestMethod.POST)
-	public ResponseEntity<String> consultarFrecuentesDeRecargas(@RequestBody String json) {
+	@RequestMapping(value = "/consultarFrecuentesRecargas", method = RequestMethod.POST)
+	public ResponseEntity<String> consultarFrecuentesRecargas(@RequestBody String json) {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Authentication authenticate;
 		ResponseEntity<String> response;
@@ -97,7 +97,48 @@ public class FrecuentesServicios {
 				resp.setMensaje("Parametro inválido ");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			} else {
-				resp = frec.consultarFrecuentes(json);
+				resp = frec.consultarFrecuentesRecargas(json);
+				if (resp.getCodigo() == -1)
+					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+				else
+					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.OK);
+			}
+		} catch (JsonSyntaxException j) {
+			j.printStackTrace();
+			if (j.getMessage().contains("NumberFormatException")) {
+				resp.setCodigo(3);
+				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
+				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return response;
+	}
+
+	@RequestMapping(value = "/consultarFrecuentesTerceros", method = RequestMethod.POST)
+	public ResponseEntity<String> consultarFrecuentesTerceros(@RequestBody String json) {
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Authentication authenticate;
+		ResponseEntity<String> response;
+		Gson gson = new Gson();
+		FrecuentesConsulta resp = new FrecuentesConsulta();
+		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
+
+		if (!authenticate.isAuthenticated()) {
+			response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			return response;
+		}
+
+		try {
+
+			if (!frec.validarInputConsulta(json)) {
+				resp.setCodigo(2);
+				resp.setMensaje("Parametro inválido ");
+				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+			} else {
+				resp = frec.consultarFrecuentesTerceros(json);
 				if (resp.getCodigo() == -1)
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 				else
@@ -156,5 +197,4 @@ public class FrecuentesServicios {
 		}
 		return response;
 	}
-	
 }
