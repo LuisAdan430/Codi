@@ -17,24 +17,25 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 import net.cero.spring.config.IPAuthenticationProvider;
-import net.cero.data.FrecuentesConsulta;
+import net.cero.data.FrecuenteConsultaPeticionOBJ;
+import net.cero.data.FrecuenteInsertOBJ;
+import net.cero.data.FrecuentesConsultaResultOBJ;
 import net.cero.data.FrecuentesDesactivar;
-import net.cero.data.FrecuentesOBJ;
 import net.cero.data.Respuesta;
 import net.cero.ahorro.logica.FrecuentesServiciosLogic;
 
 @Controller
 public class FrecuentesServicios {
-		@Autowired
+	@Autowired
 	protected IPAuthenticationProvider authenticationManager;
 
-	private static final Logger log = LogManager.getLogger(FrecuentesWS.class);
+	private static final Logger log = LogManager.getLogger(FrecuenteInsertOBJ.class);
 	FrecuentesServiciosLogic frec = new FrecuentesServiciosLogic();
+	private String mensajeValidacion = "";
 
-	@RequestMapping(value = "/registrarFavortio", method = RequestMethod.POST)
-	public ResponseEntity<String> registrarFavortio(@RequestBody String json) {
+	@RequestMapping(value = "/registrarFrecuente", method = RequestMethod.POST)
+	public ResponseEntity<String> registrarFrecuente(@RequestBody String json) {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Authentication authenticate;
 		ResponseEntity<String> response;
@@ -49,11 +50,11 @@ public class FrecuentesServicios {
 		}
 
 		try {
-			FrecuentesOBJ input = gson.fromJson(json, FrecuentesOBJ.class);
+			FrecuenteInsertOBJ input = gson.fromJson(json, FrecuenteInsertOBJ.class);
 
-			if (!frec.validarInputRegistrarFrecuente(input)) {
+			if (!this.validarInputRegistrarFrecuente(input)) {
 				resp.setCodigo(2);
-				resp.setMensaje("Parametro inválido ");
+				resp.setMensaje("Parametro inválido: " + mensajeValidacion);
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			} else {
 				resp = frec.registrarFrecuente(input);
@@ -81,7 +82,9 @@ public class FrecuentesServicios {
 		Authentication authenticate;
 		ResponseEntity<String> response;
 		Gson gson = new Gson();
-		FrecuentesConsulta resp = new FrecuentesConsulta();
+		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
+		Respuesta resp = new Respuesta();
+		FrecuentesConsultaResultOBJ respConsulta = new FrecuentesConsultaResultOBJ();
 		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
 
@@ -91,13 +94,13 @@ public class FrecuentesServicios {
 		}
 
 		try {
-
-			if (!frec.validarInputConsulta(json)) {
+			consulta = gson.fromJson(json, FrecuenteConsultaPeticionOBJ.class);
+			if (!this.validarInputConsultarFrecuente(consulta)) {
 				resp.setCodigo(2);
 				resp.setMensaje("Parametro inválido ");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			} else {
-				resp = frec.consultarFrecuentesRecargas(json);
+				respConsulta = frec.consultarFrecuentesRecargas(consulta);
 				if (resp.getCodigo() == -1)
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 				else
@@ -122,7 +125,9 @@ public class FrecuentesServicios {
 		Authentication authenticate;
 		ResponseEntity<String> response;
 		Gson gson = new Gson();
-		FrecuentesConsulta resp = new FrecuentesConsulta();
+		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
+		Respuesta resp = new Respuesta();
+		FrecuentesConsultaResultOBJ respConsulta = new FrecuentesConsultaResultOBJ();
 		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
 
@@ -132,13 +137,13 @@ public class FrecuentesServicios {
 		}
 
 		try {
-
-			if (!frec.validarInputConsulta(json)) {
+			consulta = gson.fromJson(json, FrecuenteConsultaPeticionOBJ.class);
+			if (!this.validarInputConsultarFrecuente(consulta)) {
 				resp.setCodigo(2);
 				resp.setMensaje("Parametro inválido ");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			} else {
-				resp = frec.consultarFrecuentesTerceros(json);
+				respConsulta = frec.consultarFrecuentesTerceros(consulta);
 				if (resp.getCodigo() == -1)
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 				else
@@ -174,7 +179,7 @@ public class FrecuentesServicios {
 		try {
 			FrecuentesDesactivar input = gson.fromJson(json, FrecuentesDesactivar.class);
 
-			if (!frec.validarInputDesactivarFrecuente(input)) {
+			if (!this.validarInputDesactivarFrecuente(input)) {
 				resp.setCodigo(2);
 				resp.setMensaje("Parametro inválido ");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
@@ -196,5 +201,81 @@ public class FrecuentesServicios {
 			e.printStackTrace();
 		}
 		return response;
+	}
+
+	private Boolean validarInputRegistrarFrecuente(FrecuenteInsertOBJ regFrec) {
+		if (regFrec.getAhCuenta() == null || regFrec.getAhCuenta() <= 0) {
+			mensajeValidacion = "ahCuenta";
+		}
+		if (regFrec.getCoServicioId() == null || regFrec.getCoServicioId() <= 0) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "coServicioId";
+			else
+				mensajeValidacion = mensajeValidacion + ", coServicioId";
+		}
+		if (regFrec.getReferencia() == null || regFrec.getReferencia().isEmpty()) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "referencia";
+			else
+				mensajeValidacion = mensajeValidacion + ", referencia";
+		}
+		if (regFrec.getMonto() == null || regFrec.getMonto() <= 0) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "monto";
+			else
+				mensajeValidacion = mensajeValidacion + ", monto";
+		}
+		if (regFrec.getActivo() == null || regFrec.getActivo().isEmpty()) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "activo";
+			else
+				mensajeValidacion = mensajeValidacion + ", activo";
+		}
+		if (regFrec.getUsuarioCreacion() == null || regFrec.getUsuarioCreacion() <= 0) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "usuarioCreacion";
+			else
+				mensajeValidacion = mensajeValidacion + ", usuarioCreacion";
+		}
+
+		return mensajeValidacion.isEmpty() ? true : false;
+	}
+
+	private Boolean validarInputConsultarFrecuente(FrecuenteConsultaPeticionOBJ consulFrec) {
+		if (consulFrec.getTipoServicio() == null || consulFrec.getTipoServicio().isEmpty()) {
+			mensajeValidacion = "tipoServicio";
+		}
+		if (consulFrec.getCeActivo() == null || consulFrec.getCeActivo().isEmpty()) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "ceActivo";
+			else
+				mensajeValidacion = mensajeValidacion + ", ceActivo";
+		}
+		if (consulFrec.getcCuenta() == null || consulFrec.getcCuenta().isEmpty()) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "cCuenta";
+			else
+				mensajeValidacion = mensajeValidacion + ", cCuenta";
+		}
+		if (consulFrec.getNtActivo() == null || consulFrec.getNtActivo().isEmpty()) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "ntActivo";
+			else
+				mensajeValidacion = mensajeValidacion + ", ntActivo";
+		}
+		return mensajeValidacion.isEmpty() ? true : false;
+	}
+
+	public Boolean validarInputDesactivarFrecuente(FrecuentesDesactivar desacFrec) {
+		if (desacFrec.getId() == null || desacFrec.getId() <= 0) {
+			mensajeValidacion = "id";
+		}
+		if (desacFrec.getusuarioModificacion() == null || desacFrec.getusuarioModificacion() <= 0) {
+			if (mensajeValidacion.isEmpty())
+				mensajeValidacion = "usuarioModificacion";
+			else
+				mensajeValidacion = mensajeValidacion + ", usuarioModificacion";
+		}
+		return true;
 	}
 }

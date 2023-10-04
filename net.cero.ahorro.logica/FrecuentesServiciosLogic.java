@@ -1,42 +1,32 @@
 package net.cero.ahorro.logica;
-import net.cero.data.FrecuentesConsulta;
+
+import net.cero.data.FrecuentesConsultaResultOBJ;
 import net.cero.data.FrecuentesDesactivar;
-import net.cero.data.FrecuentesOBJ;
+import net.cero.data.FrecuenteConsultaPeticionOBJ;
+import net.cero.data.FrecuenteInsertOBJ;
 import net.cero.data.Respuesta;
 
 public class FrecuentesServiciosLogic {
-	
-	public Boolean validarInputRegistrarFrecuente(FrecuentesOBJ data) {
-		return true;
-	}
 
-	public Respuesta registrarFrecuente(FrecuentesOBJ data) {
+	public Respuesta registrarFrecuente(FrecuenteInsertOBJ data) {
 		Respuesta respuesta = new Respuesta();
 		return respuesta;
 	}
 
-	public Boolean validarInputConsulta(String data) {
-		return true;
-	}
-
-	public FrecuentesConsulta consultarFrecuentesRecargas(String tipo) {
-		FrecuentesConsulta consulta = new FrecuentesConsulta();
+	public FrecuentesConsultaResultOBJ consultarFrecuentesRecargas(FrecuenteConsultaPeticionOBJ tipo) {
+		FrecuentesConsultaResultOBJ consulta = new FrecuentesConsultaResultOBJ();
 		/*
 		 
 		 * */
 		return consulta;
 	}
 
-	public FrecuentesConsulta consultarFrecuentesTerceros(String tipo) {
-		FrecuentesConsulta consulta = new FrecuentesConsulta();
+	public FrecuentesConsultaResultOBJ consultarFrecuentesTerceros(FrecuenteConsultaPeticionOBJ tipo) {
+		FrecuentesConsultaResultOBJ consulta = new FrecuentesConsultaResultOBJ();
 		/*
 		 
 		 * */
 		return consulta;
-	}
-
-	public Boolean validarInputDesactivarFrecuente(FrecuentesDesactivar data) {
-		return true;
 	}
 
 	public Respuesta desactivarFrecuente(FrecuentesDesactivar data) {
