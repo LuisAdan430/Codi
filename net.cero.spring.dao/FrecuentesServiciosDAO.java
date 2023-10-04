@@ -6,9 +6,11 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import net.cero.data.FrecuentesConsultaResultOBJ;
+import net.cero.data.FrecuentesDesactivar;
 import net.cero.data.FrecuenteConsultaPeticionOBJ;
 import net.cero.data.FrecuenteInsertOBJ;
 
@@ -19,6 +21,7 @@ public class FrecuentesServiciosDAO {
 	private String nuevoFrecuenteServicios;
 	private String obtenerFrecuenteTercerosYRecargas;
 	private String desactivarFrecuente;
+	private String buscarFrecuenteById;
 	
 	private Integer sigSecFrecuenteServicios() {
 		try {
@@ -66,26 +69,29 @@ public class FrecuentesServiciosDAO {
 		return result;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	public Integer buscarFrecuenteById(FrecuentesDesactivar req) {
+		Integer respuesta = null;
+		try {
+			List<String> results = jdbcTemplate.queryForList(buscarFrecuenteById,String.class,req.getId());
+			if(!results.isEmpty()) {
+				respuesta = Integer.parseInt(results.get(0));
+				return respuesta;
+			}else {
+				return respuesta = 0;
+			}
+		
+		}catch (EmptyResultDataAccessException  x) {
+	        x.printStackTrace();
+	       return respuesta = null;
+		}
+	}
+	public void desactivarFrecuenteById(FrecuentesDesactivar req) {
+		try {
+			jdbcTemplate.update(desactivarFrecuente,req.getusuarioModificacion(),req.getId());
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
@@ -116,6 +122,12 @@ public class FrecuentesServiciosDAO {
 	}
 	public void setDesactivarFrecuente(String desactivarFrecuente) {
 		this.desactivarFrecuente = desactivarFrecuente;
+	}
+	public String getBuscarFrecuenteById() {
+		return buscarFrecuenteById;
+	}
+	public void setBuscarFrecuenteById(String buscarFrecuenteById) {
+		this.buscarFrecuenteById = buscarFrecuenteById;
 	}
 	
 	
