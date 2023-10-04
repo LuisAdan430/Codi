@@ -15,7 +15,9 @@ import net.cero.data.FrecuenteConsultaPeticionOBJ;
 import net.cero.data.FrecuenteInsertOBJ;
 
 public class FrecuentesServiciosDAO {
+	
 	public static final Logger LOG = LogManager.getLogger(FrecuentesServiciosDAO.class);
+	
 	private JdbcTemplate jdbcTemplate;
 	private String sigSecFrecuenteServicios;
 	private String nuevoFrecuenteServicios;
@@ -34,7 +36,7 @@ public class FrecuentesServiciosDAO {
 	public Integer nuevoFrecuente(FrecuenteInsertOBJ req) {
 		try {
 			Integer idReq = sigSecFrecuenteServicios();
-			jdbcTemplate.update(nuevoFrecuenteServicios,idReq,req.getAhCuenta(),req.getCoServicioId(),req.getReferencia(),req.getMonto(),req.getActivo(),req.getUsuarioCreacion());
+			jdbcTemplate.update(nuevoFrecuenteServicios,idReq,req.getAhCuenta(),req.getCoServicioId(),req.getReferencia(),req.getMonto(),req.getAhCuenta());
 			return idReq;
 		}catch(Exception e) {
 			e.printStackTrace();
