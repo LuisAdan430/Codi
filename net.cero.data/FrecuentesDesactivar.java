@@ -3,20 +3,20 @@ package net.cero.data;
 public class FrecuentesDesactivar {
 	private int id;
 	private int usuarioModificacion;
-	
-	public void setId (Integer id) {
+
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
-	public Integer getId () {
+	public Integer getId() {
 		return this.id;
 	}
 
-	public void setusuarioModificacion (Integer usuarioModificacion) {
+	public void setusuarioModificacion(Integer usuarioModificacion) {
 		this.usuarioModificacion = usuarioModificacion;
 	}
 
-	public Integer getusuarioModificacion () {
+	public Integer getusuarioModificacion() {
 		return this.usuarioModificacion;
 	}
 

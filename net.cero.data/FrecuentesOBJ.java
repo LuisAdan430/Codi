@@ -1,65 +1,60 @@
 package net.cero.data;
 
 public class FrecuentesOBJ {
-	
+
 	private Integer ahCuenta;
 	private Integer coServicioId;
 	private String referencia;
 	private Float monto;
 	private String activo;
 	private Integer usuarioCreacion;
-	
+
 	public void setAhCuenta(Integer ahCuenta) {
-		this.ahCuenta=ahCuenta;
+		this.ahCuenta = ahCuenta;
 	}
-	
+
 	public Integer getAhCuenta() {
 		return this.ahCuenta;
 	}
-	
-	public void setCoServicioId (Integer coServicioId) {
+
+	public void setCoServicioId(Integer coServicioId) {
 		this.coServicioId = coServicioId;
 	}
 
-	public Integer getCoServicioId () {
+	public Integer getCoServicioId() {
 		return this.coServicioId;
 	}
-	
-	
-	public void setReferencia (String referencia) {
+
+	public void setReferencia(String referencia) {
 		this.referencia = referencia;
 	}
-	
-	public String getReferencia () {
+
+	public String getReferencia() {
 		return this.referencia;
 	}
-	
-	public void setMonto (Float monto) {
+
+	public void setMonto(Float monto) {
 		this.monto = monto;
 	}
-	
-	public Float getMonto () {
+
+	public Float getMonto() {
 		return this.monto;
 	}
-	
-	public void setActivo (String activo) {
+
+	public void setActivo(String activo) {
 		this.activo = activo;
 	}
-	
-	public String getActivo () {
+
+	public String getActivo() {
 		return this.activo;
 	}
-	
-	
-	public void setUsuarioCreacion (Integer usuarioCreacion) {
+
+	public void setUsuarioCreacion(Integer usuarioCreacion) {
 		this.usuarioCreacion = usuarioCreacion;
 	}
 
-	public Integer getUsuarioCreacion () {
+	public Integer getUsuarioCreacion() {
 		return this.usuarioCreacion;
 	}
-
-	
-			
 
 }
