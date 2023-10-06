@@ -38,29 +38,30 @@ public class FrecuentesServiciosDAO {
 		}
 	} 
 	
-	public List<FrecuentesConsultaResultOBJ> obtenerFrecuenteByCuenta(FrecuenteConsultaPeticionOBJ req) {
+	public List<FrecuentesConsultaResultOBJ> obtenerFrecuenteByCuenta(FrecuenteConsultaPeticionOBJ req){
 		List<FrecuentesConsultaResultOBJ> result = new ArrayList<FrecuentesConsultaResultOBJ>();
-		List<Map<String, Object>> rows;
+		List<Map<String,Object>> rows;
 		FrecuentesConsultaResultOBJ object = new FrecuentesConsultaResultOBJ();
 		try {
-			rows = jdbcTemplate.queryForList(obtenerFrecuenteTercerosYRecargas, req.getTipoServicio(),
-					req.getCeActivo(), req.getcCuenta(), req.getNtActivo());
-			for (Map<String, Object> row : rows) {
+			rows = jdbcTemplate.queryForList(obtenerFrecuenteTercerosYRecargas,req.getTipoServicio(),req.getCeActivo(),req.getcCuenta(),req.getNtActivo());
+			for(Map<String, Object> row : rows) {
 				object = new FrecuentesConsultaResultOBJ();
-				object.setCeId((Integer) row.get("ce.id"));
-				object.setCeServicio((String) row.get("ce.servicio"));
-				object.setCeTipoProducto((String) row.get("ce.tipo_producto"));
-				object.setCeTipoServicio((String) row.get("ce.tipo_servicio"));
-				object.setCeNememp((String) row.get("ce.nememp"));
-				object.setCeSubemp((String) row.get("ce.subemp"));
-				object.setCeComision((Integer) row.get("ce.comision"));
-				object.setCcServicioCodigo((String) row.get("cc.servicio_codigo"));
-
+				object.setCeId((Long) row.get("id"));
+				object.setCeServicio((String) row.get("servicio"));
+				object.setCeTipoProducto((String) row.get("tipo_producto"));
+				object.setCeTipoServicio((String) row.get("tipo_servicio"));
+				object.setCeNememp((String) row.get("nememp"));
+				object.setCeSubemp((String) row.get("subemp"));
+				
+				object.setCeComision((Float) row.get("comision"));
+				
+				object.setCcServicioCodigo((String) row.get("servicio_codigo"));
+				
 				result.add(object);
-
+				
 			}
-
-		} catch (Exception e) {
+			
+		}catch(Exception e) {
 			e.printStackTrace();
 			return null;
 		}

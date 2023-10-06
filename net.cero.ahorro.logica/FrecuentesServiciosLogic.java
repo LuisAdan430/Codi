@@ -44,6 +44,15 @@ public class FrecuentesServiciosLogic {
 			if (idCuenta > 0) {
 				resultado = dao.buscarCoServiciosEmpresasPorId(data);
 				if (resultado > 0) {
+					//Validar que en la tabla frecuentes no este registrado ya con estos campos
+					
+					
+					//Si ya existe evaluo el activo si esta activo ya existe
+					
+					//Si no esta activo se hace el update ,,, Se deja la fecha en la que se ejecuta el proceso
+					
+					//y si esta null se inserta el nuevo frecuente ,,
+					
 					resultado = dao.nuevoFrecuente(data, idCuenta);
 					if (resultado == 1) {
 						respuesta.setCodigo(0);

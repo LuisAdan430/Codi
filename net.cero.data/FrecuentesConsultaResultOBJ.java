@@ -1,20 +1,20 @@
 package net.cero.data;
 
 public class FrecuentesConsultaResultOBJ {
-	private Integer ceId;
+	private Long ceId;
 	private String ceServicio;
 	private String ceTipoProducto;
 	private String ceTipoServicio;
 	private String ceNememp;
 	private String ceSubemp;
-	private Integer ceComision;
+	private Float ceComision;
 	private String ccServicioCodigo;
 
-	public Integer getCeId() {
+	public Long getCeId() {
 		return ceId;
 	}
 
-	public void setCeId(Integer ceId) {
+	public void setCeId(Long ceId) {
 		this.ceId = ceId;
 	}
 
@@ -58,11 +58,11 @@ public class FrecuentesConsultaResultOBJ {
 		this.ceSubemp = ceSubemp;
 	}
 
-	public Integer getCeComision() {
+	public Float getCeComision() {
 		return ceComision;
 	}
 
-	public void setCeComision(Integer ceComision) {
+	public void setCeComision(Float ceComision) {
 		this.ceComision = ceComision;
 	}
 
