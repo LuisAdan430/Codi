@@ -5,6 +5,7 @@ public class FrecuenteConsultaPeticionOBJ {
 	private String ceActivo;
 	private String cCuenta;
 	private String ntActivo;
+
 	public String getTipoServicio() {
 		return tipoServicio;
 	}

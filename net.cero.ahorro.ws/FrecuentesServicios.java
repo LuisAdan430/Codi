@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,7 +54,6 @@ public class FrecuentesServicios {
 
 		try {
 			FrecuenteInsertOBJ input = gson.fromJson(json, FrecuenteInsertOBJ.class);
-
 			if (!this.validarInputRegistrarFrecuente(input)) {
 				resp.setCodigo(2);
 				resp.setMensaje("Parametro inválido: " + mensajeValidacion);
@@ -63,19 +65,15 @@ public class FrecuentesServicios {
 				else
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.OK);
 			}
-		} catch (JsonSyntaxException j) {
-			j.printStackTrace();
-			if (j.getMessage().contains("NumberFormatException")) {
-				resp.setCodigo(3);
-				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
-				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception j) {
+			resp.setCodigo(3);
+			resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
+			response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+
 		}
 		return response;
 	}
-
+	
 	@RequestMapping(value = "/consultarFrecuentesRecargas", method = RequestMethod.POST)
 	public ResponseEntity<String> consultarFrecuentesRecargas(@RequestBody String json) {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -84,7 +82,10 @@ public class FrecuentesServicios {
 		Gson gson = new Gson();
 		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
 		Respuesta resp = new Respuesta();
-		FrecuentesConsultaResultOBJ respConsulta = new FrecuentesConsultaResultOBJ();
+		resp.setCodigo(-1);
+		resp.setMensaje("No se pudo encontrar informacion de los frecuentes");
+		
+		List<FrecuentesConsultaResultOBJ> respConsulta = new ArrayList<FrecuentesConsultaResultOBJ>();
 		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
 
@@ -101,10 +102,10 @@ public class FrecuentesServicios {
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			} else {
 				respConsulta = frec.consultarFrecuentesRecargas(consulta);
-				if (resp.getCodigo() == -1)
+				if (respConsulta == null)				
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 				else
-					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.OK);
+					response = new ResponseEntity<>((gson.toJson(respConsulta)).toString(), HttpStatus.OK);
 			}
 		} catch (JsonSyntaxException j) {
 			j.printStackTrace();
@@ -113,8 +114,6 @@ public class FrecuentesServicios {
 				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		return response;
 	}
@@ -127,7 +126,9 @@ public class FrecuentesServicios {
 		Gson gson = new Gson();
 		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
 		Respuesta resp = new Respuesta();
-		FrecuentesConsultaResultOBJ respConsulta = new FrecuentesConsultaResultOBJ();
+		resp.setCodigo(-1);
+		resp.setMensaje("No se pudo encontrar informacion de los frecuentes");
+		List<FrecuentesConsultaResultOBJ> respConsulta = new ArrayList<FrecuentesConsultaResultOBJ>();
 		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
 
@@ -144,10 +145,10 @@ public class FrecuentesServicios {
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			} else {
 				respConsulta = frec.consultarFrecuentesTerceros(consulta);
-				if (resp.getCodigo() == -1)
+				if (respConsulta == null)
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 				else
-					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.OK);
+					response = new ResponseEntity<>((gson.toJson(respConsulta)).toString(), HttpStatus.OK);
 			}
 		} catch (JsonSyntaxException j) {
 			j.printStackTrace();
@@ -156,8 +157,6 @@ public class FrecuentesServicios {
 				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		return response;
 	}
@@ -197,15 +196,13 @@ public class FrecuentesServicios {
 				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
 				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		return response;
 	}
 
 	private Boolean validarInputRegistrarFrecuente(FrecuenteInsertOBJ regFrec) {
-		if (regFrec.getAhCuenta() == null || regFrec.getAhCuenta() <= 0) {
-			mensajeValidacion = "ahCuenta";
+		if (regFrec.getCuenta() == null || regFrec.getCuenta().isEmpty()) {
+			mensajeValidacion = "cuenta";
 		}
 		if (regFrec.getCoServicioId() == null || regFrec.getCoServicioId() <= 0) {
 			if (mensajeValidacion.isEmpty())
@@ -225,19 +222,6 @@ public class FrecuentesServicios {
 			else
 				mensajeValidacion = mensajeValidacion + ", monto";
 		}
-		if (regFrec.getActivo() == null || regFrec.getActivo().isEmpty()) {
-			if (mensajeValidacion.isEmpty())
-				mensajeValidacion = "activo";
-			else
-				mensajeValidacion = mensajeValidacion + ", activo";
-		}
-		if (regFrec.getUsuarioCreacion() == null || regFrec.getUsuarioCreacion() <= 0) {
-			if (mensajeValidacion.isEmpty())
-				mensajeValidacion = "usuarioCreacion";
-			else
-				mensajeValidacion = mensajeValidacion + ", usuarioCreacion";
-		}
-
 		return mensajeValidacion.isEmpty() ? true : false;
 	}
 
@@ -270,7 +254,7 @@ public class FrecuentesServicios {
 		if (desacFrec.getId() == null || desacFrec.getId() <= 0) {
 			mensajeValidacion = "id";
 		}
-		if (desacFrec.getusuarioModificacion() == null || desacFrec.getusuarioModificacion() <= 0) {
+		if (desacFrec.getusuarioModificacion() == null || desacFrec.getusuarioModificacion().isEmpty()) {
 			if (mensajeValidacion.isEmpty())
 				mensajeValidacion = "usuarioModificacion";
 			else

@@ -2,21 +2,20 @@ package net.cero.data;
 
 public class FrecuenteInsertOBJ {
 	
-	private Integer ahCuenta;
+	private String cuenta;
 	private Integer coServicioId;
 	private String referencia;
-	private Float monto;
-	private String activo;
-	private Integer usuarioCreacion;
+	private Double monto;
+
 	
 	
 
-	public void setAhCuenta(Integer ahCuenta) {
-			this.ahCuenta = ahCuenta;
+	public void setCuenta(String cuenta) {
+			this.cuenta = cuenta;
 	}
 
-	public Integer getAhCuenta() {
-			return this.ahCuenta;
+	public String getCuenta() {
+			return this.cuenta;
 	}
 
 	public void setCoServicioId(Integer coServicioId) {
@@ -35,28 +34,13 @@ public class FrecuenteInsertOBJ {
 			return this.referencia;
 	}
 
-	public void setMonto(Float monto) {
+	public void setMonto(Double monto) {
 			this.monto = monto;
 	}
 
-	public Float getMonto() {
+	public Double getMonto() {
 			return this.monto;
 	}
-
-	public void setActivo(String activo) {
-			this.activo = activo;
-	}
-
-	public String getActivo() {
-			return this.activo;
-	}
-
-	public void setUsuarioCreacion(Integer usuarioCreacion) {
-			this.usuarioCreacion = usuarioCreacion;
-	}
-
-	public Integer getUsuarioCreacion() {
-			return this.usuarioCreacion;
-	}
+	
 
 }
