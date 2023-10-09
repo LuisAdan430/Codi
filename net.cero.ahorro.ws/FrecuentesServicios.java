@@ -51,7 +51,6 @@ public class FrecuentesServicios {
 			response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 			return response;
 		}
-
 		try {
 			FrecuenteInsertOBJ input = gson.fromJson(json, FrecuenteInsertOBJ.class);
 			if (!this.validarInputRegistrarFrecuente(input)) {
@@ -65,102 +64,69 @@ public class FrecuentesServicios {
 				else
 					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.OK);
 			}
-		} catch (Exception j) {
+		} catch (JsonSyntaxException j) {
 			resp.setCodigo(3);
 			resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
 			response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+		} catch (Exception i) {
+			i.printStackTrace();
+			if (i.getMessage().contains("NumberFormatException")) {
+				resp.setCodigo(3);
+				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
+				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+			}
+		}
+		return response;
+	}
 
+	@RequestMapping(value = "/consultarFrecuentes", method = RequestMethod.POST)
+	public ResponseEntity<String> consultarFrecuentes(@RequestBody String json) {
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Authentication authenticate;
+		ResponseEntity<String> response;
+		Gson gson = new Gson();
+		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
+		Respuesta resp = new Respuesta();
+		resp.setCodigo(-1);
+		resp.setMensaje("No se pudo encontrar informacion de los frecuentes");
+
+		List<FrecuentesConsultaResultOBJ> respConsulta = new ArrayList<FrecuentesConsultaResultOBJ>();
+		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
+
+		if (!authenticate.isAuthenticated()) {
+			response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			return response;
+		}
+
+		try {
+			consulta = gson.fromJson(json, FrecuenteConsultaPeticionOBJ.class);
+			if (!this.validarInputConsultarFrecuente(consulta)) {
+				resp.setCodigo(2);
+				resp.setMensaje("Parametro inválido ");
+				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+			} else {
+				respConsulta = frec.consultarFrecuentesRecargas(consulta);				
+				if (respConsulta == null)
+					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+				else {
+					resp.setData(gson.toJson(respConsulta));
+					resp.setCodigo(0);
+					resp.setMensaje("Consulta exitosa");
+					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.OK);
+				}
+			}
+		} catch (JsonSyntaxException j) {
+			j.printStackTrace();
+			if (j.getMessage().contains("NumberFormatException")) {
+				resp.setCodigo(3);
+				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
+				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
+			}
 		}
 		return response;
 	}
 	
-	@RequestMapping(value = "/consultarFrecuentesRecargas", method = RequestMethod.POST)
-	public ResponseEntity<String> consultarFrecuentesRecargas(@RequestBody String json) {
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-		Authentication authenticate;
-		ResponseEntity<String> response;
-		Gson gson = new Gson();
-		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
-		Respuesta resp = new Respuesta();
-		resp.setCodigo(-1);
-		resp.setMensaje("No se pudo encontrar informacion de los frecuentes");
-		
-		List<FrecuentesConsultaResultOBJ> respConsulta = new ArrayList<FrecuentesConsultaResultOBJ>();
-		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
-		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
-
-		if (!authenticate.isAuthenticated()) {
-			response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-			return response;
-		}
-
-		try {
-			consulta = gson.fromJson(json, FrecuenteConsultaPeticionOBJ.class);
-			if (!this.validarInputConsultarFrecuente(consulta)) {
-				resp.setCodigo(2);
-				resp.setMensaje("Parametro inválido ");
-				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
-			} else {
-				respConsulta = frec.consultarFrecuentesRecargas(consulta);
-				if (respConsulta == null)				
-					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
-				else
-					response = new ResponseEntity<>((gson.toJson(respConsulta)).toString(), HttpStatus.OK);
-			}
-		} catch (JsonSyntaxException j) {
-			j.printStackTrace();
-			if (j.getMessage().contains("NumberFormatException")) {
-				resp.setCodigo(3);
-				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
-				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
-			}
-		}
-		return response;
-	}
-
-	@RequestMapping(value = "/consultarFrecuentesTerceros", method = RequestMethod.POST)
-	public ResponseEntity<String> consultarFrecuentesTerceros(@RequestBody String json) {
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-		Authentication authenticate;
-		ResponseEntity<String> response;
-		Gson gson = new Gson();
-		FrecuenteConsultaPeticionOBJ consulta = new FrecuenteConsultaPeticionOBJ();
-		Respuesta resp = new Respuesta();
-		resp.setCodigo(-1);
-		resp.setMensaje("No se pudo encontrar informacion de los frecuentes");
-		List<FrecuentesConsultaResultOBJ> respConsulta = new ArrayList<FrecuentesConsultaResultOBJ>();
-		response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
-		authenticate = authenticationManager.authenticate(securityContext.getAuthentication());
-
-		if (!authenticate.isAuthenticated()) {
-			response = new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-			return response;
-		}
-
-		try {
-			consulta = gson.fromJson(json, FrecuenteConsultaPeticionOBJ.class);
-			if (!this.validarInputConsultarFrecuente(consulta)) {
-				resp.setCodigo(2);
-				resp.setMensaje("Parametro inválido ");
-				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
-			} else {
-				respConsulta = frec.consultarFrecuentesTerceros(consulta);
-				if (respConsulta == null)
-					response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.INTERNAL_SERVER_ERROR);
-				else
-					response = new ResponseEntity<>((gson.toJson(respConsulta)).toString(), HttpStatus.OK);
-			}
-		} catch (JsonSyntaxException j) {
-			j.printStackTrace();
-			if (j.getMessage().contains("NumberFormatException")) {
-				resp.setCodigo(3);
-				resp.setMensaje("Error de syntaxis, formato de entrada incorrecto");
-				response = new ResponseEntity<>((gson.toJson(resp)).toString(), HttpStatus.BAD_REQUEST);
-			}
-		}
-		return response;
-	}
-
 	@RequestMapping(value = "/desactivarFrecuente", method = RequestMethod.POST)
 	public ResponseEntity<String> desactivarFrecuente(@RequestBody String json) {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -229,32 +195,20 @@ public class FrecuentesServicios {
 		if (consulFrec.getTipoServicio() == null || consulFrec.getTipoServicio().isEmpty()) {
 			mensajeValidacion = "tipoServicio";
 		}
-		if (consulFrec.getCeActivo() == null || consulFrec.getCeActivo().isEmpty()) {
-			if (mensajeValidacion.isEmpty())
-				mensajeValidacion = "ceActivo";
-			else
-				mensajeValidacion = mensajeValidacion + ", ceActivo";
-		}
 		if (consulFrec.getcCuenta() == null || consulFrec.getcCuenta().isEmpty()) {
 			if (mensajeValidacion.isEmpty())
 				mensajeValidacion = "cCuenta";
 			else
 				mensajeValidacion = mensajeValidacion + ", cCuenta";
 		}
-		if (consulFrec.getNtActivo() == null || consulFrec.getNtActivo().isEmpty()) {
-			if (mensajeValidacion.isEmpty())
-				mensajeValidacion = "ntActivo";
-			else
-				mensajeValidacion = mensajeValidacion + ", ntActivo";
-		}
 		return mensajeValidacion.isEmpty() ? true : false;
 	}
 
 	public Boolean validarInputDesactivarFrecuente(FrecuentesDesactivar desacFrec) {
-		if (desacFrec.getId() == null || desacFrec.getId() <= 0) {
+		if (desacFrec.getCoFrecuenteId() == null || desacFrec.getCoFrecuenteId() <= 0) {
 			mensajeValidacion = "id";
 		}
-		if (desacFrec.getusuarioModificacion() == null || desacFrec.getusuarioModificacion().isEmpty()) {
+		if (desacFrec.getCuenta() == null || desacFrec.getCuenta().isEmpty()) {
 			if (mensajeValidacion.isEmpty())
 				mensajeValidacion = "usuarioModificacion";
 			else

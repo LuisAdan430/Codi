@@ -12,6 +12,7 @@ import net.cero.data.FrecuenteInsertOBJ;
 import net.cero.data.Respuesta;
 import net.cero.spring.config.Apps;
 import net.cero.spring.dao.FrecuentesServiciosDAO;
+import net.cero.data.FrecuenteValidacionRespuesta;
 
 public class FrecuentesServiciosLogic {
 	private static final Logger log = LogManager.getLogger(FrecuentesServiciosLogic.class);
@@ -38,27 +39,33 @@ public class FrecuentesServiciosLogic {
 		respuesta.setCodigo(-1);
 		respuesta.setMensaje("Ocurrio un error al registrar frecuente");
 		Integer resultado = -1;
-
 		try {
 			int idCuenta = dao.buscarAhCuentasPorCuenta(data);
 			if (idCuenta > 0) {
 				resultado = dao.buscarCoServiciosEmpresasPorId(data);
 				if (resultado > 0) {
-					//Validar que en la tabla frecuentes no este registrado ya con estos campos
-					
-					
-					//Si ya existe evaluo el activo si esta activo ya existe
-					
-					//Si no esta activo se hace el update ,,, Se deja la fecha en la que se ejecuta el proceso
-					
-					//y si esta null se inserta el nuevo frecuente ,,
-					
-					resultado = dao.nuevoFrecuente(data, idCuenta);
-					if (resultado == 1) {
-						respuesta.setCodigo(0);
-						respuesta.setMensaje("Frecuente registrado exitosamente");
-					} else if (resultado == 0) {
-						respuesta.setCodigo(1);
+					FrecuenteValidacionRespuesta frecuente = dao.validarFrecuente(data, idCuenta);
+					if (frecuente.getCodigo() == 4) {
+						resultado = dao.nuevoFrecuente(data, idCuenta);
+						if (resultado == 1) {
+							respuesta.setCodigo(0);
+							respuesta.setMensaje("Frecuente registrado exitosamente");
+						} else if (resultado == 0) {
+							respuesta.setCodigo(1);
+						}
+					} else if (frecuente.getCodigo() == 0) {			
+						if (frecuente.getActivo().equals("NO")) {
+							resultado = dao.actualizarFrecuente(data, frecuente.getId(), idCuenta);
+							if (resultado == 1) {
+								respuesta.setCodigo(0);
+								respuesta.setMensaje("Frecuente actualizado exitosamente");
+							} else if (resultado == 0) {
+								respuesta.setCodigo(1);
+							}
+						} else {
+							respuesta.setCodigo(5);
+							respuesta.setMensaje("El frecuente ya se encuentra registrado.");
+						}
 					}
 				} else if (resultado == -2) {
 					respuesta.setCodigo(4);
@@ -108,7 +115,7 @@ public class FrecuentesServiciosLogic {
 		if (resultado > 0) {
 			int idCuenta = dao.buscarAhCuentasPorId(data);
 			if (resultado > 0) {
-				resultado = dao.desactivarFrecuentePorId(data,idCuenta);
+				resultado = dao.desactivarFrecuentePorId(data, idCuenta);
 				if (resultado == 1) {
 					respuesta.setCodigo(0);
 					respuesta.setMensaje("Frecuente eliminado correctamente.");
