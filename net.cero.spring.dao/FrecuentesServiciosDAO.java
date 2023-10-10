@@ -13,7 +13,7 @@ import net.cero.data.FrecuentesConsultaResultOBJ;
 import net.cero.data.FrecuentesDesactivar;
 import net.cero.data.FrecuenteConsultaPeticionOBJ;
 import net.cero.data.FrecuenteInsertOBJ;
-import net.cero.data.FrecuenteValidacionRespuesta;
+import net.cero.data.FrecuenteExistente;
 
 public class FrecuentesServiciosDAO {
 	public static final Logger LOG = LogManager.getLogger(FrecuentesServiciosDAO.class);
@@ -32,8 +32,8 @@ public class FrecuentesServiciosDAO {
 	public Integer nuevoFrecuente(FrecuenteInsertOBJ req, Integer idCuenta) {
 		try {
 			Integer resultado = 0;
-			resultado = jdbcTemplate.update(nuevoFrecuenteServicios, 289, req.getCoServicioId(), req.getReferencia(),
-					req.getMonto(), 289);
+			resultado = jdbcTemplate.update(nuevoFrecuenteServicios, idCuenta, req.getCoServicioId(),
+					req.getReferencia(), req.getMonto(), idCuenta);
 			return resultado;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -41,44 +41,30 @@ public class FrecuentesServiciosDAO {
 		}
 	}
 
-	public FrecuenteValidacionRespuesta validarFrecuente(FrecuenteInsertOBJ req, Integer idCuenta) {
-		FrecuenteValidacionRespuesta respuesta = new FrecuenteValidacionRespuesta();
+	public FrecuenteExistente validarFrecuente(FrecuenteInsertOBJ req, Integer idCuenta) {
+		FrecuenteExistente frecuenteExistente = new FrecuenteExistente();
 		Map<String, Object> row;
 		try {
-			row = jdbcTemplate.queryForMap(buscarFrecuenteValidacion, idCuenta, req.getCoServicioId(),req.getReferencia());
-			respuesta.setId((Integer) row.get("id"));
-			respuesta.setActivo((String) row.get("activo"));
-			respuesta.setCodigo(0);
-			
+			row = jdbcTemplate.queryForMap(buscarFrecuenteValidacion, idCuenta, req.getCoServicioId(),
+					req.getReferencia());
+			frecuenteExistente.setId((Integer) row.get("id"));
+			frecuenteExistente.setActivo((String) row.get("activo"));
 		} catch (EmptyResultDataAccessException x) {
 			x.printStackTrace();
-			respuesta.setCodigo(4);
+			frecuenteExistente = null;
 		} catch (Exception e) {
 			e.printStackTrace();
-			respuesta.setId(-1);
+			frecuenteExistente.setId(-1);
 		}
-		return respuesta;
+		return frecuenteExistente;
 	}
-
-	public List<FrecuentesConsultaResultOBJ> obtenerFrecuenteByCuenta(FrecuenteConsultaPeticionOBJ req) {
+	
+	public List<FrecuentesConsultaResultOBJ> obtenerFrecuenteTerceros(FrecuenteConsultaPeticionOBJ req) {
 		List<FrecuentesConsultaResultOBJ> result = new ArrayList<FrecuentesConsultaResultOBJ>();
 		List<Map<String, Object>> rows;
-		FrecuentesConsultaResultOBJ object = new FrecuentesConsultaResultOBJ();
 		try {
-			rows = jdbcTemplate.queryForList(obtenerFrecuenteTercerosYRecargas, req.getTipoServicio(),
-					req.getcCuenta());
-			for (Map<String, Object> row : rows) {
-				object = new FrecuentesConsultaResultOBJ();
-				object.setCeId((Long) row.get("id"));
-				object.setCeServicio((String) row.get("servicio"));
-				object.setCeTipoProducto((String) row.get("tipo_producto"));
-				object.setCeTipoServicio((String) row.get("tipo_servicio"));
-				object.setCeNememp((String) row.get("nememp"));
-				object.setCeSubemp((String) row.get("subemp"));
-				object.setCeComision((Float) row.get("comision"));
-				object.setCcServicioCodigo((String) row.get("servicio_codigo"));
-				result.add(object);
-			}
+			rows = jdbcTemplate.queryForList(obtenerFrecuenteTercerosYRecargas, "Terceros", req.getCuenta());
+			result = mapearConsulta(rows);			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -86,35 +72,61 @@ public class FrecuentesServiciosDAO {
 		return result;
 	}
 
-	public Integer buscarCoServiciosEmpresasPorId(FrecuenteInsertOBJ req) {
-		Integer respuesta = -1;
+	public List<FrecuentesConsultaResultOBJ> obtenerFrecuenteRecargas(FrecuenteConsultaPeticionOBJ req) {
+		List<FrecuentesConsultaResultOBJ> result = new ArrayList<FrecuentesConsultaResultOBJ>();
+		List<Map<String, Object>> rows;
 		try {
-			List<String> results = jdbcTemplate.queryForList(buscarCoServiciosEmpresasPorId, String.class,
-					req.getCoServicioId());
+			rows = jdbcTemplate.queryForList(obtenerFrecuenteTercerosYRecargas, "Recargas", req.getCuenta());
+			result = mapearConsulta(rows);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		return result;
+	}
+
+	public List<FrecuentesConsultaResultOBJ> mapearConsulta(List<Map<String, Object>> rows) {
+		List<FrecuentesConsultaResultOBJ> result = new ArrayList<FrecuentesConsultaResultOBJ>();
+		FrecuentesConsultaResultOBJ object = new FrecuentesConsultaResultOBJ();
+		for (Map<String, Object> row : rows) {
+			object = new FrecuentesConsultaResultOBJ();
+			object.setCeId((Long) row.get("id"));
+			object.setCeServicio((String) row.get("servicio"));
+			object.setCeTipoProducto((String) row.get("tipo_producto"));
+			object.setCeTipoServicio((String) row.get("tipo_servicio"));
+			object.setCeNememp((String) row.get("nememp"));
+			object.setCeSubemp((String) row.get("subemp"));
+			object.setCeComision((Float) row.get("comision"));
+			object.setCcServicioCodigo((String) row.get("servicio_codigo"));
+			result.add(object);
+		}
+		return result;
+	}
+
+	public Integer buscarCoServiciosEmpresasPorId(Integer idServicio) {
+		Integer respuesta = 0;
+		try {
+			List<Integer> results = jdbcTemplate.queryForList(buscarCoServiciosEmpresasPorId, Integer.class,
+					idServicio);
 			if (!results.isEmpty()) {
-				respuesta = Integer.parseInt(results.get(0));
-			} else {
-				respuesta = 1;
+				respuesta = results.get(0);
 			}
 
-		} catch (EmptyResultDataAccessException x) {
+		} catch (Exception x) {
 			x.printStackTrace();
 			respuesta = -1;
 		}
 		return respuesta;
 	}
 
-	public Integer buscarAhCuentasPorCuenta(FrecuenteInsertOBJ req) {
-		Integer respuesta = null;
+	public Integer buscarAhCuentasPorCuenta(String cuenta) {
+		Integer respuesta = 0;
 		try {
-			List<String> results = jdbcTemplate.queryForList(buscarAhCuentasPorCuenta, String.class, req.getCuenta());
+			List<Integer> results = jdbcTemplate.queryForList(buscarAhCuentasPorCuenta, Integer.class, cuenta);
 			if (!results.isEmpty()) {
-				respuesta = Integer.parseInt(results.get(0));
-			} else {
-				respuesta = -2;
+				respuesta = results.get(0);
 			}
-
-		} catch (EmptyResultDataAccessException x) {
+		} catch (Exception x) {
 			x.printStackTrace();
 			respuesta = -1;
 		}
@@ -122,33 +134,27 @@ public class FrecuentesServiciosDAO {
 	}
 
 	public Integer buscarFrecuentePorId(FrecuentesDesactivar req) {
-		Integer respuesta = null;
+		Integer respuesta = 0;
 		try {
 			List<String> results = jdbcTemplate.queryForList(buscarFrecuentePorId, String.class,
 					req.getCoFrecuenteId());
 			if (!results.isEmpty()) {
 				respuesta = Integer.parseInt(results.get(0));
-			} else {
-				respuesta = -2;
 			}
-
-		} catch (EmptyResultDataAccessException x) {
-			x.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 			respuesta = -1;
 		}
 		return respuesta;
 	}
 
 	public Integer buscarAhCuentasPorId(FrecuentesDesactivar req) {
-		Integer respuesta = null;
+		Integer respuesta = 0;
 		try {
 			List<String> results = jdbcTemplate.queryForList(buscarAhCuentasPorCuenta, String.class, req.getCuenta());
 			if (!results.isEmpty()) {
 				respuesta = Integer.parseInt(results.get(0));
-			} else {
-				respuesta = -2;
 			}
-
 		} catch (Exception x) {
 			x.printStackTrace();
 			respuesta = -1;
